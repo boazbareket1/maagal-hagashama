@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="מעגל הגשמה">
+<title>מעגל הגשמה</title>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:#F0E8D0;
+  background-image:radial-gradient(ellipse at 20% 10%,#E8DCBC 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 90%,#DDD0B0 0%,transparent 60%);
+  font-family:'Frank Ruhl Libre',serif;
+  min-height:100vh;
+  padding:20px 14px 50px;
+  direction:rtl;
+  -webkit-font-smoothing:antialiased;
+}
+.hdr{text-align:center;margin-bottom:20px}
+.hdr-sub{font-size:11px;letter-spacing:.22em;color:#7B9E87;margin-bottom:4px;font-weight:300}
+.hdr-title{font-size:32px;font-weight:900;color:#1E3A2F;letter-spacing:.04em}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;max-width:700px;margin-left:auto;margin-right:auto}
+.slot{border-radius:13px;border:1.5px dashed rgba(107,143,113,.5);background:rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:4px;transition:all .2s;position:relative;min-height:140px;user-select:none}
+.slot.active{border-style:solid;border-color:#C9943A!important;animation:sglow 1.1s ease-in-out infinite}
+.slot.filled{border-style:solid;background:rgba(255,255,255,.5);min-height:210px;justify-content:flex-start}
+@keyframes sglow{0%,100%{box-shadow:0 0 0 3px rgba(201,148,58,.3)}50%{box-shadow:0 0 0 6px rgba(201,148,58,.6)}}
+.slot-num{font-size:9px;letter-spacing:.08em;font-weight:300}
+.slot-name{font-size:20px;font-weight:900;line-height:1}
+.slot-sub{font-size:10px;margin-top:2px}
+.slot-hint{font-size:9px;color:#C9943A;margin-top:5px}
+.filled-label{text-align:center;font-size:15px;font-weight:900;letter-spacing:.04em;line-height:1;padding-bottom:5px;border-bottom:1px solid rgba(0,0,0,.07);width:100%;margin-bottom:4px}
+.cards-row{display:flex;flex-direction:row;gap:6px;width:100%;flex:1;min-height:160px}
+.card-wrap{flex:1;border-radius:11px;overflow:hidden;position:relative;border:1.5px solid rgba(0,0,0,.1)}
+.qbtn{position:absolute;bottom:6px;left:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92);border:1.5px solid rgba(0,0,0,.2);cursor:pointer;font-size:13px;font-weight:700;font-family:serif;display:flex;align-items:center;justify-content:center;z-index:5;padding:0}
+.exp-zone{flex:1;border-radius:11px;border:1.5px dashed rgba(185,130,30,.4);background:rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s;min-height:160px}
+.exp-zone.exp-active{border-color:#C9943A;background:rgba(201,148,58,.08)}
+.explain-box{margin-top:6px;border-radius:9px;background:rgba(255,255,255,.65);border:1px solid rgba(0,0,0,.1);padding:10px 12px;font-size:12px;color:#3A3028;line-height:1.7;width:100%}
+.msg-bar{text-align:center;font-size:13px;color:#9E7B6B;margin:0 auto 16px;padding:8px 20px;background:rgba(255,255,255,.5);border-radius:30px;max-width:700px}
+.deck-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;max-width:700px;margin-left:auto;margin-right:auto}
+.deck-label{font-size:14px;color:#1E3A2F;font-weight:700}
+.btn-reset{background:#1E3A2F;color:#C9943A;border:none;border-radius:30px;padding:7px 20px;font-size:13px;font-family:'Frank Ruhl Libre',serif;cursor:pointer;font-weight:700}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;max-width:700px;margin:0 auto}
+.mini{height:95px;border-radius:12px;overflow:hidden;border:1.5px solid #2E5840;transition:transform .15s;cursor:default;position:relative}
+@keyframes cglow{0%,100%{box-shadow:0 4px 14px rgba(201,148,58,.25)}50%{box-shadow:0 8px 24px rgba(201,148,58,.65)}}
+.mini.pickable{cursor:pointer;animation:cglow 1.3s ease-in-out infinite}
+.mini.pickable:active{transform:scale(.96)}
+.cback{background:linear-gradient(145deg,#1A3628,#264D3A 55%,#1A3628);width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+.cfront{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:6px 4px;gap:2px}
+.cf-num{font-size:8px;letter-spacing:.08em;font-weight:300}
+.cf-word{font-weight:700;text-align:center;line-height:1.15;direction:rtl}
+.cf-eng{font-size:8px;letter-spacing:.05em;font-weight:300;text-align:center}
+@keyframes ap{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.appear{animation:ap .35s ease-out}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center;direction:rtl;padding:20px}
+.modal-box{background:#FAF5E8;border-radius:16px;padding:24px 20px;max-width:320px;width:100%;text-align:center}
+.modal-input{width:100%;padding:10px 12px;border:1.5px solid rgba(201,148,58,.6);border-radius:10px;font-size:13px;margin-bottom:12px;direction:ltr;text-align:left;font-family:monospace;background:#FDF9F0;outline:none}
+/* welcome screen */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px}
+.welcome-title{font-size:42px;font-weight:900;color:#1E3A2F;margin-bottom:8px}
+.welcome-sub{font-size:13px;color:#7B9E87;letter-spacing:.15em;margin-bottom:30px}
+.welcome-desc{font-size:14px;color:#5A4A3A;line-height:1.8;max-width:280px;margin-bottom:40px}
+.btn-start{background:#1E3A2F;color:#C9943A;border:none;border-radius:30px;padding:14px 36px;font-size:16px;font-family:'Frank Ruhl Libre',serif;font-weight:700;cursor:pointer;letter-spacing:.04em}
+.step{display:flex;align-items:flex-start;gap:10px;text-align:right;margin-bottom:14px;max-width:280px}
+.step-num{background:#C9943A;color:#1E3A2F;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:#5A4A3A;line-height:1.6}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var CARDS=[
+  {id:1,word:"חוסן",eng:"Resilience",g:1},{id:2,word:"אומץ",eng:"Courage",g:1},
+  {id:3,word:"בהירות",eng:"Clarity",g:1},{id:4,word:"ענווה",eng:"Humility",g:1},
+  {id:5,word:"חמלה",eng:"Compassion",g:1},{id:6,word:"סבלנות",eng:"Patience",g:1},
+  {id:7,word:"עצמיות",eng:"Selfhood",g:1},{id:8,word:"מסירות",eng:"Devotion",g:1},
+  {id:9,word:"שלווה",eng:"Serenity",g:1},{id:10,word:"יושרה",eng:"Integrity",g:1},
+  {id:11,word:"פריצה",eng:"Breakthrough",g:2},{id:12,word:"שחרור",eng:"Release",g:2},
+  {id:13,word:"זרימה",eng:"Flow",g:2},{id:14,word:"יצירה",eng:"Creation",g:2},
+  {id:15,word:"צמיחה",eng:"Growth",g:2},{id:16,word:"התמרה",eng:"Transformation",g:2},
+  {id:17,word:"תעוזה",eng:"Daring",g:2},{id:18,word:"ביטוי",eng:"Expression",g:2},
+  {id:19,word:"התחדשות",eng:"Renewal",g:2},{id:20,word:"מיקוד",eng:"Focus",g:2},
+  {id:21,word:"השראה",eng:"Inspiration",g:3},{id:22,word:"נוכחות",eng:"Presence",g:3},
+  {id:23,word:"התבוננות",eng:"Reflection",g:3},{id:24,word:"ערנות",eng:"Awareness",g:3},
+  {id:25,word:"אינטואיציה",eng:"Intuition",g:3},{id:26,word:"הודיה",eng:"Gratitude",g:3},
+  {id:27,word:"פליאה",eng:"Wonder",g:3},{id:28,word:"אמת",eng:"Truth",g:3},
+  {id:29,word:"קבלה",eng:"Acceptance",g:3},{id:30,word:"שקט",eng:"Silence",g:3},
+  {id:31,word:"אמון",eng:"Trust",g:4},{id:32,word:"נתינה",eng:"Giving",g:4},
+  {id:33,word:"פתיחות",eng:"Openness",g:4},{id:34,word:"הדהוד",eng:"Resonance",g:4},
+  {id:35,word:"גבולות",eng:"Boundaries",g:4},{id:36,word:"שותפות",eng:"Partnership",g:4},
+  {id:37,word:"הכלה",eng:"Holding",g:4},{id:38,word:"עומק",eng:"Depth",g:4},
+  {id:39,word:"התמסרות",eng:"Surrender",g:4},{id:40,word:"שלמות",eng:"Wholeness",g:4}
+];
+var GC={
+  1:{p:"#6B8F71",d:"#4A6B50",bg:"#EBF2EC",blob:"#7FAD85"},
+  2:{p:"#C4714B",d:"#9E4A28",bg:"#F7EDE6",blob:"#D4896A"},
+  3:{p:"#6B7FA6",d:"#3A5080",bg:"#E8EBF5",blob:"#8299C0"},
+  4:{p:"#9E7B6B",d:"#6E4A38",bg:"#F2ECE8",blob:"#B89080"}
+};
+var SLOTS=[
+  {id:"זיהוי",sub:"מה עולה ומבקש תשומת לב",num:"01",color:"#6B8F71"},
+  {id:"פיענוח",sub:"מה מסתתר מאחורי הפני השטח",num:"02",color:"#6B7FA6"},
+  {id:"הכלה",sub:"מה לקבל ולהכיל בתוכי",num:"03",color:"#C9943A"},
+  {id:"פעולה",sub:"מה לעשות עם זה בפועל",num:"04",color:"#C4714B"}
+];
+var SLOT_CTX={
+  "זיהוי":"מה עולה ומבקש תשומת לב — מה מדבר אליך כרגע, מה הנושא שעולה",
+  "פיענוח":"מה מסתתר מאחורי הפני השטח — כיצד הנושא מהדהד בתוכך פנימה",
+  "הכלה":"גיוס מה לקבל ולהכיל בתוכי — מה מחזק אותך ותומך בך",
+  "פעולה":"מה לעשות עם זה בפועל — מה קורא לך לעשות, מה הצעד הבא"
+};
+var shuffle=function(a){return[...a].sort(function(){return Math.random()-.5;});};
+
+var S={screen:'welcome',deck:shuffle(CARDS),slots:{},exps:{},activeSlot:null,expSlot:null,placed:new Set(),explain:{},apiKey:null,showModal:false,pendingEx:null};
+
+function vi(n,i){return(n*137+i*31)%20;}
+function makeSVG(card,size){
+  var c=GC[card.g],n=card.id,s='';
+  if(card.g===1){
+    s='<ellipse cx="29" cy="29" rx="'+(20+vi(n,1)%4)+'" ry="'+(17+vi(n,2)%5)+'" fill="'+c.blob+'" fill-opacity=".12" transform="rotate('+(vi(n,3)*18)+',29,29)"/>'
+     +'<polygon points="29,'+(9+vi(n,4)%5)+' '+(44+vi(n,5)%5)+',29 29,'+(47+vi(n,6)%4)+' '+(13+vi(n,7)%5)+',29" fill="'+c.p+'" fill-opacity=".28" stroke="'+c.p+'" stroke-width="1.2"/>'
+     +'<circle cx="29" cy="29" r="'+(4+vi(n,8)%3)+'" fill="'+c.p+'" fill-opacity=".7"/>';
+  }else if(card.g===2){
+    s='<ellipse cx="29" cy="29" rx="'+(21+vi(n,1)%4)+'" ry="'+(18+vi(n,2)%4)+'" fill="'+c.blob+'" fill-opacity=".12" transform="rotate('+(vi(n,3)*15)+',29,29)"/>'
+     +'<path d="M'+(12+vi(n,4)%6)+','+(36+vi(n,5)%5)+' Q29,'+(8+vi(n,6)%8)+' '+(46-vi(n,7)%5)+','+(36+vi(n,8)%5)+'" fill="none" stroke="'+c.p+'" stroke-width="2.3" stroke-linecap="round"/>'
+     +'<circle cx="'+(25+vi(n,9)%7)+'" cy="'+(24+vi(n,10)%7)+'" r="'+(4+vi(n,11)%3)+'" fill="'+c.p+'" fill-opacity=".55"/>';
+  }else if(card.g===3){
+    s='<ellipse cx="29" cy="29" rx="'+(20+vi(n,1)%4)+'" ry="'+(17+vi(n,2)%4)+'" fill="'+c.blob+'" fill-opacity=".12"/>'
+     +'<circle cx="29" cy="29" r="18" fill="none" stroke="'+c.p+'" stroke-width=".9" stroke-opacity=".45"/>'
+     +'<circle cx="29" cy="29" r="'+(10+vi(n,3)%4)+'" fill="'+c.p+'" fill-opacity=".18"/>'
+     +'<circle cx="29" cy="29" r="'+(3+vi(n,4)%2)+'" fill="'+c.p+'" fill-opacity=".75"/>'
+     +'<line x1="29" y1="11" x2="29" y2="47" stroke="'+c.p+'" stroke-width=".7" stroke-opacity=".3"/>'
+     +'<line x1="11" y1="29" x2="47" y2="29" stroke="'+c.p+'" stroke-width=".7" stroke-opacity=".3"/>';
+  }else{
+    s='<ellipse cx="29" cy="29" rx="'+(20+vi(n,1)%5)+'" ry="'+(23+vi(n,2)%5)+'" fill="'+c.blob+'" fill-opacity=".12" transform="rotate('+(vi(n,3)*12)+',29,29)"/>'
+     +'<path d="M'+(14+vi(n,4)%5)+','+(22+vi(n,5)%7)+' C'+(18+vi(n,6)%5)+','+(10+vi(n,7)%4)+' '+(36+vi(n,8)%4)+','+(10+vi(n,9)%4)+' '+(42-vi(n,10)%4)+','+(22+vi(n,11)%5)+' S'+(44-vi(n,12)%5)+','+(42+vi(n,13)%4)+' '+(14+vi(n,14)%4)+','+(38-vi(n,15)%5)+' Z" fill="'+c.p+'" fill-opacity=".22" stroke="'+c.p+'" stroke-width="1"/>'
+     +'<circle cx="29" cy="29" r="5" fill="'+c.p+'" fill-opacity=".65"/>';
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 58 58" style="display:block;flex-shrink:0">'+s+'</svg>';
+}
+function backHTML(){
+  return '<div class="cback">'
+    +'<svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.13"><defs>'
+    +'<pattern id="bp" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">'
+    +'<circle cx="7" cy="7" r=".7" fill="#C9943A"/>'
+    +'<path d="M0,7 L14,7 M7,0 L7,14" stroke="#C9943A" stroke-width=".3"/>'
+    +'</pattern></defs><rect width="100%" height="100%" fill="url(#bp)"/></svg>'
+    +'<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(201,148,58,.7);display:flex;align-items:center;justify-content:center;z-index:1;position:relative">'
+    +'<div style="width:18px;height:18px;border-radius:50%;background:rgba(201,148,58,.25);border:1px solid rgba(201,148,58,.5)"></div></div>'
+    +'<div style="position:absolute;top:5px;right:5px;width:7px;height:7px;border:1px solid rgba(201,148,58,.4);border-radius:2px"></div>'
+    +'<div style="position:absolute;top:5px;left:5px;width:7px;height:7px;border:1px solid rgba(201,148,58,.4);border-radius:2px"></div>'
+    +'<div style="position:absolute;bottom:5px;right:5px;width:7px;height:7px;border:1px solid rgba(201,148,58,.4);border-radius:2px"></div>'
+    +'<div style="position:absolute;bottom:5px;left:5px;width:7px;height:7px;border:1px solid rgba(201,148,58,.4);border-radius:2px"></div>'
+    +'</div>';
+}
+function frontHTML(card,sz){
+  var c=GC[card.g];
+  var fs=card.word.length>6?11:card.word.length>4?14:17;
+  return '<div class="cfront" style="background:linear-gradient(155deg,#FAF5E8 0%,'+c.bg+' 100%);border-radius:10px">'
+    +'<div class="cf-num" style="color:'+c.p+'80">'+String(card.id).padStart(2,'0')+'</div>'
+    +makeSVG(card,sz)
+    +'<div style="width:55%;height:.5px;background:'+c.p+'30;margin:2px 0"></div>'
+    +'<div class="cf-word" style="font-size:'+fs+'px;color:'+c.d+'">'+card.word+'</div>'
+    +'<div class="cf-eng" style="color:'+c.p+'90">'+card.eng+'</div>'
+    +'</div>';
+}
+
+function renderWelcome(){
+  return '<div class="welcome">'
+    +'<div class="hdr-sub">✦ כלי להתבוננות עצמית ✦</div>'
+    +'<div class="welcome-title">מעגל הגשמה</div>'
+    +'<div class="welcome-desc">משחק קלפים למה מסתתר מאחורי הפני השטח. ארבע משבצות, ארבעים קלפים, אינסוף תובנות.</div>'
+    +'<div style="margin-bottom:30px;width:100%;max-width:280px">'
+    +'<div class="step"><div class="step-num">1</div><div class="step-text">לחץ על משבצת (זיהוי, פיענוח, הכלה, פעולה) כדי להפעיל אותה</div></div>'
+    +'<div class="step"><div class="step-num">2</div><div class="step-text">לחץ על קלף הפוך מהמגש — הוא יתגלה במשבצת</div></div>'
+    +'<div class="step"><div class="step-num">3</div><div class="step-text">לחץ + להוסיף קלף הרחבה לכל משבצת</div></div>'
+    +'</div>'
+    +'<button class="btn-start" onclick="startGame()">התחל ✦</button>'
+    +'</div>';
+}
+
+function renderGame(){
+  var deck=S.deck,slots=S.slots,exps=S.exps,placed=S.placed;
+  var available=deck.filter(function(c){return !placed.has(c.id);});
+  var allFilled=SLOTS.every(function(s){return slots[s.id];});
+  var waiting=!!(S.activeSlot||S.expSlot);
+
+  var msg='לחץ על משבצת ריקה להפעלה';
+  if(S.activeSlot) msg='✦ "'+S.activeSlot+'" פעילה — לחץ על קלף מהמגש';
+  if(S.expSlot) msg='הרחבה ל"'+S.expSlot+'" — לחץ על קלף מהמגש';
+  if(allFilled&&!S.activeSlot&&!S.expSlot) msg='✦ הפריסה הושלמה — שמור או שתף ✦';
+
+  var slotsHTML=SLOTS.map(function(slot){
+    var sc=slot.color,card=slots[slot.id],exp=exps[slot.id];
+    var isActive=S.activeSlot===slot.id,isExpActive=S.expSlot===slot.id;
+    var ex=S.explain[slot.id];
+
+    if(!card){
+      return '<div class="slot'+(isActive?' active':'')+'" onclick="clickSlot(\''+slot.id+'\')" style="border-color:'+(isActive?'#C9943A':sc+'55')+';cursor:'+((!S.activeSlot&&!S.expSlot)||isActive?'pointer':'default')+'">'
+        +'<div class="slot-num" style="color:'+sc+'80">'+slot.num+'</div>'
+        +'<div class="slot-name" style="color:'+(isActive?'#C9943A':sc+'CC')+'">'+slot.id+'</div>'
+        +'<div class="slot-sub" style="color:'+sc+'70">'+slot.sub+'</div>'
+        +(isActive?'<div class="slot-hint">↓ בחר קלף</div>':'')
+        +'</div>';
+    }
+
+    var expZone=exp
+      ?'<div class="card-wrap appear" style="border-color:'+sc+'40">'+frontHTML(exp,52)+'<button class="qbtn" onclick="doExplain(\''+slot.id+'\',\'exp\')" style="border-color:'+sc+'70;color:'+sc+'">?</button></div>'
+      :'<div class="exp-zone'+(isExpActive?' exp-active':'')+'" onclick="clickExpZone(\''+slot.id+'\')">'
+        +'<div style="font-size:20px;color:'+(isExpActive?'#C9943A':'rgba(185,130,30,.5)')+'">+</div>'
+        +'<div style="font-size:9px;color:'+(isExpActive?'#C9943A':'rgba(185,130,30,.65)')+';text-align:center">'+(isExpActive?'בחר קלף':'הרחב')+'</div>'
+        +'</div>';
+
+    var exBox='';
+    if(ex){
+      exBox='<div class="explain-box">';
+      if(ex.loading) exBox+='<div style="text-align:center;color:#7B9E87;font-size:11px">✦ מייצר הסבר...</div>';
+      else if(ex.text){
+        exBox+=ex.text;
+        if(!ex.expandLoading&&!ex.expandText) exBox+='<br><button onclick="doExpandEx(\''+slot.id+'\')" style="margin-top:7px;background:transparent;border:1px dashed rgba(185,130,30,.4);border-radius:8px;color:rgba(185,130,30,.9);font-size:10px;font-family:inherit;padding:4px 12px;cursor:pointer;width:100%">לא ברור — הרחב</button>';
+        if(ex.expandLoading) exBox+='<div style="margin-top:6px;text-align:center;color:#7B9E87;font-size:11px">✦ מרחיב...</div>';
+        if(ex.expandText) exBox+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);font-size:11px;color:#5A4A3A;line-height:1.7">'+ex.expandText+'</div>';
+        exBox+='<button onclick="closeEx(\''+slot.id+'\')" style="margin-top:6px;background:transparent;border:none;color:rgba(0,0,0,.25);font-size:10px;cursor:pointer;width:100%;text-align:center;font-family:inherit">סגור ✕</button>';
+      }
+      exBox+='</div>';
+    }
+
+    return '<div class="slot filled" style="border-color:'+sc+'50">'
+      +'<div class="filled-label" style="color:'+sc+'">'+slot.id+'</div>'
+      +'<div class="cards-row">'
+        +'<div class="card-wrap appear" style="border-color:'+sc+'40">'+frontHTML(card,58)+'<button class="qbtn" onclick="doExplain(\''+slot.id+'\',\'main\')" style="border-color:'+sc+'70;color:'+sc+'">?</button></div>'
+        +expZone
+      +'</div>'
+      +exBox
+      +'</div>';
+  }).join('');
+
+  var cardsHTML=available.map(function(c){
+    return '<div class="mini'+(waiting?' pickable':'')+'" onclick="pickCard('+c.id+')">'+backHTML()+'</div>';
+  }).join('');
+
+  var modal='';
+  if(S.showModal){
+    modal='<div class="modal-overlay">'
+      +'<div class="modal-box">'
+      +'<div style="font-size:20px;font-weight:900;color:#1E3A2F;margin-bottom:8px">מפתח API</div>'
+      +'<div style="font-size:12px;color:#7B6B5A;margin-bottom:14px;line-height:1.6">להסברים מ-Claude נדרש מפתח API אישי.<br><a href="https://console.anthropic.com" target="_blank" style="color:#6B8F71">console.anthropic.com</a></div>'
+      +'<input class="modal-input" id="mk" type="password" placeholder="sk-ant-..." autofocus>'
+      +'<button onclick="confirmKey()" style="width:100%;background:#1E3A2F;color:#C9943A;border:none;border-radius:24px;padding:10px;font-size:14px;font-family:inherit;font-weight:700;cursor:pointer;margin-bottom:8px">אשר ✓</button>'
+      +'<button onclick="cancelKey()" style="width:100%;background:transparent;border:none;color:#9E8070;font-size:12px;cursor:pointer;font-family:inherit">ביטול</button>'
+      +'</div></div>';
+  }
+
+  return '<div class="hdr"><div class="hdr-sub">✦ כלי להתבוננות עצמית ✦</div><h1 class="hdr-title">מעגל הגשמה</h1></div>'
+    +'<div class="grid4">'+slotsHTML+'</div>'
+    +'<div class="msg-bar">'+msg+'</div>'
+    +'<div class="deck-hdr"><span class="deck-label">המגש ('+available.length+' קלפים)</span><button class="btn-reset" onclick="doReset()">↺ איפוס</button></div>'
+    +'<div class="cards-grid">'+cardsHTML+'</div>'
+    +modal;
+}
+
+function render(){
+  document.getElementById('app').innerHTML=S.screen==='welcome'?renderWelcome():renderGame();
+}
+
+window.startGame=function(){S.screen='game';render();};
+window.clickSlot=function(id){if(S.slots[id]||S.expSlot)return;S.activeSlot=(S.activeSlot===id)?null:id;render();};
+window.clickExpZone=function(id){if(S.activeSlot)return;S.expSlot=(S.expSlot===id)?null:id;render();};
+window.pickCard=function(id){
+  if(!S.activeSlot&&!S.expSlot)return;
+  if(S.placed.has(id))return;
+  var card=S.deck.find(function(c){return c.id===id;});
+  if(!card)return;
+  if(S.expSlot){S.exps[S.expSlot]=card;S.placed.add(id);S.expSlot=null;}
+  else{S.slots[S.activeSlot]=card;S.placed.add(id);S.activeSlot=null;}
+  render();
+};
+window.doReset=function(){
+  S.deck=shuffle(CARDS);S.slots={};S.exps={};S.activeSlot=null;S.expSlot=null;S.placed=new Set();S.explain={};
+  render();
+};
+window.confirmKey=function(){
+  var k=document.getElementById('mk').value.trim();
+  if(!k)return;
+  S.apiKey=k;S.showModal=false;
+  if(S.pendingEx){doExplain(S.pendingEx.slotId,S.pendingEx.which);S.pendingEx=null;}
+  render();
+};
+window.cancelKey=function(){S.showModal=false;S.pendingEx=null;render();};
+window.closeEx=function(id){S.explain[id]=null;render();};
+
+window.doExplain=function(slotId,which){
+  var card=(which==='main')?S.slots[slotId]:S.exps[slotId];
+  if(!card)return;
+  if(S.explain[slotId]&&!S.explain[slotId].loading){S.explain[slotId]=null;render();return;}
+  if(!S.apiKey){S.showModal=true;S.pendingEx={slotId:slotId,which:which};render();return;}
+  S.explain[slotId]={loading:true,text:null,expandLoading:false,expandText:null,word:card.word};
+  render();
+  var prompt='הקלף "'+card.word+'" נפל במשבצת "'+slotId+'" שמייצגת: '+SLOT_CTX[slotId]+'.\n\nתן הסבר קצר ומשמעותי (2-3 משפטים) של מה שהקלף הזה מציע בהקשר הספציפי הזה. דבר ישירות אל הקורא בגוף שני, בטון חם. אל תפתח בשם הקלף.';
+  callAPI(prompt,function(err,txt){
+    if(!S.explain[slotId])return;
+    S.explain[slotId].loading=false;S.explain[slotId].text=err||txt;render();
+  });
+};
+window.doExpandEx=function(slotId){
+  var ex=S.explain[slotId];if(!ex||!ex.text)return;
+  ex.expandLoading=true;render();
+  var prompt='הסברת קודם:\n"'+ex.text+'"\n\nהמשתמש ביקש הרחבה. הוסף שכבה של עומק — דוגמה מחיי היומיום, שאלה לתהייה, או זווית נוספת. 3-4 משפטים.';
+  callAPI(prompt,function(err,txt){
+    if(!S.explain[slotId])return;
+    S.explain[slotId].expandLoading=false;S.explain[slotId].expandText=err||txt;render();
+  });
+};
+
+function callAPI(prompt,cb){
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':S.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,
+      system:'אתה מדריך נבון ורגיש לתהליכים פנימיים. ענה תמיד בעברית, בטון חם וישיר. תשובות קצרות וממוקדות.',
+      messages:[{role:'user',content:prompt}]})
+  }).then(function(r){
+    if(!r.ok){if(r.status===401)S.apiKey=null;throw new Error('שגיאה '+r.status);}
+    return r.json();
+  }).then(function(d){cb(null,d.content&&d.content[0]?d.content[0].text:'אין תגובה.');})
+  .catch(function(e){cb(e.message||'שגיאה',null);});
+}
+
+
+window.saveReading=function(){
+  var hasCards=SLOTS.some(function(s){return S.slots[s.id];});
+  if(!hasCards){alert('הנח קלפים תחילה');return;}
+  var lines=[];
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('he-IL')+' '+now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+  lines.push('מעגל הגשמה — פריסה מ-'+dateStr);
+  lines.push('='.repeat(40));
+  lines.push('');
+  SLOTS.forEach(function(slot){
+    var card=S.slots[slot.id];
+    var exp=S.exps[slot.id];
+    if(card){
+      lines.push('[ '+slot.id+' ] — '+slot.sub);
+      lines.push('  קלף ראשי: '+card.word+' ('+card.eng+')');
+      var ex=S.explain[slot.id];
+      if(ex&&ex.text) lines.push('  הסבר: '+ex.text.replace(/<[^>]+>/g,''));
+      if(exp) lines.push('  קלף הרחבה: '+exp.word+' ('+exp.eng+')');
+      lines.push('');
+    }
+  });
+  lines.push('='.repeat(40));
+  lines.push('נוצר עם מעגל הגשמה');
+  var txt=lines.join('\n');
+  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='מעגל_הגשמה_'+now.toISOString().slice(0,10)+'.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+render();
+</script>
+</body>
+</html>
